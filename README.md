@@ -1,3 +1,5 @@
+### 이미지를 M x N 으로 자른후에 random rotation, flip, mirroring을 각 grid에 적용하고 원본 이미지로 다시 복원합니다.
+
 실행환경 ubuntu 18.04
 
 1. git clone 
