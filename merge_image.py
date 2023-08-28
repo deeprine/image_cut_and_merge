@@ -147,34 +147,41 @@ if __name__ == '__main__':
 
     # N개씩 합쳐진 M개의 이미지 merge
     base_cc_img = concat_imgs[0]
+    copy_concat = concat_imgs.copy()
 
-    for cc_img in concat_imgs[1:]:
+    for _ in range(len(copy_concat)-1):
         every_best_diff = float('inf')
         every_best_img = 0
         every_best_loc = 0
         every_best_ind = 0
 
-        ori_idx, ori_diff, ori_img = edge_equal(base_cc_img, cc_img, direction='topdown')
-        flip_idx, flip_diff, flip_img = edge_equal(base_cc_img, cc_img, direction='topdown', transform='flip')
-        mirr_idx, mirr_diff, mirr_img = edge_equal(base_cc_img, cc_img, direction='topdown', transform='mirror')
-        fm_idx, fm_diff, fm_img = edge_equal(base_cc_img, cc_img, direction='topdown', transform='f_m')
+        for ind, cc_img in enumerate(concat_imgs[1:]):
+            ori_idx, ori_diff, ori_img = edge_equal(base_cc_img, cc_img, direction='topdown')
+            flip_idx, flip_diff, flip_img = edge_equal(base_cc_img, cc_img, direction='topdown', transform='flip')
+            mirr_idx, mirr_diff, mirr_img = edge_equal(base_cc_img, cc_img, direction='topdown', transform='mirror')
+            fm_idx, fm_diff, fm_img = edge_equal(base_cc_img, cc_img, direction='topdown', transform='f_m')
 
-        diff_values = [ori_diff, flip_diff, mirr_diff, fm_diff]
-        diff_imgs = [ori_img, flip_img, mirr_img, fm_img]
-        diff_loc = [ori_idx, flip_idx, mirr_idx, fm_idx]
+            diff_values = [ori_diff, flip_diff, mirr_diff, fm_diff]
+            diff_imgs = [ori_img, flip_img, mirr_img, fm_img]
+            diff_loc = [ori_idx, flip_idx, mirr_idx, fm_idx]
 
-        best_idx = diff_values.index(min(diff_values))
-        best_diff = diff_values[best_idx]
+            print(diff_values)
+            best_idx = diff_values.index(min(diff_values))
+            best_diff = diff_values[best_idx]
 
-        if every_best_diff > best_diff:
-            every_best_diff = best_diff
-            every_best_img = diff_imgs[best_idx]
-            every_best_loc = diff_loc[best_idx]
+            if every_best_diff > best_diff:
+                every_best_diff = best_diff
+                every_best_img = diff_imgs[best_idx]
+                cv2.imwrite(f'test_{ind}.png', every_best_img)
+                every_best_loc = diff_loc[best_idx]
+                every_best_ind = ind + 1
 
         if every_best_loc == 0:
             base_cc_img = cv2.vconcat([every_best_img, base_cc_img])
         elif every_best_loc == 1:
             base_cc_img = cv2.vconcat([base_cc_img, every_best_img])
+
+        concat_imgs.pop(every_best_ind)
 
     print('merge 완료')
     cv2.imwrite(f'good_result.png', base_cc_img)
